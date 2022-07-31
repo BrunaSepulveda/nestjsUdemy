@@ -11,7 +11,7 @@ import { CookieSessionModule } from 'nestjs-cookie-session';
 @Module({
   imports: [
     CookieSessionModule.forRoot({
-      session: { secret: 'asdasdasdasd', name: 'cookieUser', signed: false },
+      session: { secret: 'asdasdasdasd', name: 'userId', signed: false },
     }),
     TypeOrmModule.forRoot({
       type: 'sqlite',

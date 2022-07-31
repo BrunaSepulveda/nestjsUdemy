@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   Session,
+  UseGuards,
   // UseInterceptors,
 } from '@nestjs/common';
 import { Serialize } from '../interceptors/serialize.intercptor';
@@ -21,6 +22,7 @@ import { UsersService } from './users.service';
 import { Response } from 'express';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Users } from './users.entity';
+import { AuthGuard } from '../guards/auth.guard';
 // import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 // import { SerializerInterceptor } from '../interceptors/serialize.intercptor';
 
@@ -52,36 +54,38 @@ export class UsersController {
       quemSouEu(@Session() session: any) {
         return this.usersService.findOne(session.userId);
       }
+
+  UseGuards > execute o guard antes de qualquer controller ou handler
   */
 
   @Post('/signout')
   async signOut(@Res({ passthrough: true }) response: Response) {
-    response.clearCookie('cookieUser');
+    response.clearCookie('userId');
   }
 
   @Post('/signup')
   async createUser(
     @Body() createUserDto: CreateUserDto,
-    @Session() session: { cookieUser?: number },
+    @Session() session: { userId?: number },
   ) {
     const user = await this.authService.signup(
       createUserDto.email,
       createUserDto.password,
     );
-    session.cookieUser = user.id;
+    session.userId = user.id;
     return user;
   }
 
   @Post('/signin')
   async signin(
     @Body() createUserDto: CreateUserDto,
-    @Session() session: { cookieUser?: number },
+    @Session() session: { userId?: number },
   ) {
     const user = await this.authService.signin(
       createUserDto.email,
       createUserDto.password,
     );
-    session.cookieUser = user.id;
+    session.userId = user.id;
     return user;
   }
 
@@ -91,6 +95,7 @@ export class UsersController {
   }
 
   @Get('quemsoueu')
+  @UseGuards(AuthGuard)
   quemsoueu(@CurrentUser() user: Users) {
     return user;
   }
